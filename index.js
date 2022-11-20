@@ -1,5 +1,6 @@
 const express = require('express');
-const bodyParser = require('body-parser')
+const bodyParser = require('body-parser');
+const { fail, success } = require('./generic-models');
 const app = express();
 
 app.use(bodyParser.json())
@@ -50,9 +51,9 @@ WHERE CTE.JOINCOUNT >= $4
 
   pool.query(sql, values, (error, results) => {
     if (error) {
-      req.status(500).json({ok: false, error: error, data: null});
+      req.status(500).json(fail(error));
     }
-    res.status(200).json({ok: true, error: null, data: results.rows});
+    res.status(200).json(success(results.rows));
   })
 });
 
