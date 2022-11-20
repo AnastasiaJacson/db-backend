@@ -1,6 +1,6 @@
-const path = require('path')
+import path from 'path'
 
-class Router {
+export class Router {
     constructor(path = '/api') {
         this.router = [];
         this.path = path;
@@ -49,4 +49,4 @@ class Router {
     }
 }
 
-module.exports = Router;
+export default Router;

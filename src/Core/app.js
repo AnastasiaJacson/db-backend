@@ -1,16 +1,19 @@
+import { ApiRouter } from "../routes";
+import express, {json} from "express";
+import bodyParser from "body-parser";
+import {ResultError} from "./ResultWrapper";
+import knex from "knex";
 require('dotenv').config();
 
-const ApiRouter = require("../routes");
-const {Pool, BoundPool} = require("pg");
-const {json,} = require("express");
-const bodyParser = require("body-parser");
-const {ResultError} = require("./ResultWrapper");
+/** @typedef {function(import('express').Request, any, knex): Promise<any>} Controller */
+/** @typedef {function(import('knex').Knex): any} DataModel */
 
-class App {
+
+export default class App {
     constructor(port) {
         this.port = port;
 
-        this.app = require('express')();
+        this.app = express();
         this.app.use(json())
         this.app.use(
             bodyParser.urlencoded({
@@ -25,22 +28,18 @@ class App {
             }
         }
 
-        this.db = new Pool({
-            user: process.env.PG_USER,
-            host: process.env.PG_HOST,
-            database: process.env.PG_DB,
-            password: process.env.PG_PASSWORD,
-            port: process.env.PG_PORT,
-
-            reconnectOnDatabaseIsStartingError: true,
-            // Number of retries to attempt when there's an error matching `retryConnectionErrorCodes`. A value of 0 will disable connection retry.
-            retryConnectionMaxRetries: 5,
-            // Milliseconds to wait between retry connection attempts after receiving a connection error with code that matches `retryConnectionErrorCodes`. A value of 0 will try reconnecting immediately.
-            retryConnectionWaitMillis: 100,
-            // Error codes to trigger a connection retry.
-            retryConnectionErrorCodes: ['ENOTFOUND', 'EAI_AGAIN'],
-
-            connectionTimeoutMillis: 1000,
+        this.db = knex({
+            client: 'pg',
+            version: '7.2',
+            connection: {
+                user: process.env.PG_USER,
+                host: process.env.PG_HOST,
+                database: process.env.PG_DB,
+                password: process.env.PG_PASSWORD,
+                port: process.env.PG_PORT,
+            },
+            pool: { min: 0, max: 7 },
+            acquireConnectionTimeout: 3000
         });
 
         this.db.on('error', (err) => {
@@ -65,12 +64,10 @@ class App {
 
     async start() {
 
-        // check connection
-        let res = await this.db.connect()
+        await this.db.raw("SELECT 1")
             .catch((err) => {
                 throw new Error('Failed to connect to database: ' + err.message);
-            })
-        res.release();
+            });
 
         console.log('Connected to database');
         this.app.listen(this.port, () => {
@@ -78,5 +75,3 @@ class App {
         });
     }
 }
-
-module.exports = App;
