@@ -8,7 +8,7 @@ const ResultSuccess = (data) => {
 
 const ResultError = (code, message) => {
     return {
-        success: true,
+        success: false,
         data: null,
         error: {
             code,

@@ -1,8 +1,7 @@
-const getAllAlcoholics = (db, id) => {
-    return db.query("SELECT * FROM person.alcoholic");
-
+const getAlcoholic = (db, id) => {
+    return db.query("SELECT * FROM person.alcoholic WHERE alcoholic_id = $1", [id])
 }
 
 module.exports = {
-    getAllAlcoholics
+    getAlcoholic
 }
