@@ -2,16 +2,18 @@
 import Router from './Core/router';
 
 // import handlers
-import { AlcoholicsListEndpoint, AlcoholicInfoEndpoint}from './Controller/SampleController';
+import {AlcoholicsListEndpoint, AlcoholicInfoEndpoint} from './Controller/SampleController';
+import {AutocompleteEndpoint} from "./Controller/Autocomplete";
 
 // define router
-export const ApiRouter = (db) => new Router('/api/v1', db)
+export const ApiRouter = (db) => new Router('/api', db)
 
     // get alcoholic info endpoint
     .get('/alcoholic/:id', AlcoholicInfoEndpoint)
     .get('/alcoholics', AlcoholicsListEndpoint)
+    .post('/autocomplete', AutocompleteEndpoint)
 
-    // TODO: write your endpoints below
-    // .METHOD(PATH, HANDLER)
+// TODO: write query your endpoints below
+// example: .METHOD(PATH, HANDLER)
 
 

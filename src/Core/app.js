@@ -3,9 +3,10 @@ import express, {json} from "express";
 import bodyParser from "body-parser";
 import {ResultError} from "./ResultWrapper";
 import knex from "knex";
+import cors from "cors";
 require('dotenv').config();
 
-/** @typedef {function(import('express').Request, any, knex): Promise<any>} Controller */
+/** @typedef {function(import('express').Request, any, import('knex').Knex): Promise<any>} Controller */
 /** @typedef {function(import('knex').Knex): any} DataModel */
 
 
@@ -14,6 +15,7 @@ export default class App {
         this.port = port;
 
         this.app = express();
+        this.app.use(cors())
         this.app.use(json())
         this.app.use(
             bodyParser.urlencoded({
