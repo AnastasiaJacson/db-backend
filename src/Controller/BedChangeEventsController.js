@@ -1,6 +1,6 @@
 import ResultWrapper from "../Core/ResultWrapper";
 import { getAlcoholic } from "../DataModel/AlcoholicModel";
-import { addBedChangeEvent, addJoinEvent, checkBedStatus, getAlcoholicBedId, getBed, isAlcoholicInBed } from "../DataModel/EventModel";
+import { addBedChangeEvent, checkBedStatus, getAlcoholicBedId, getBed, isAlcoholicInBed } from "../DataModel/EventModel";
 
 export const AddBedChangeEventEndpoint = async (req, res, db) => {
   const { alcoholicId, newBedId } = req.body;

@@ -5,12 +5,12 @@ import { getInspector } from "../DataModel/InspectorModel";
 
 export const AddJoinEventEndpoint = async (req, res, db) => {
     if (!(await getBed(db)(req.body.bedId))) {
-        res.status(400).json(ResultWrapper.error(400, 'Bed does not exist'));
+        res.status(404).json(ResultWrapper.error(404, 'Bed does not exist'));
         return;  
     }
 
     if (!(await getAlcoholic(db)(req.body.alcoholicId))) {
-        res.status(400).json(ResultWrapper.error(400, 'Alcoholic does not exist'));
+        res.status(404).json(ResultWrapper.error(404, 'Alcoholic does not exist'));
         return;  
     }
 

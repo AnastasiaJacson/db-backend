@@ -1,4 +1,3 @@
-import {addAlcoholic, getAlcoholic, getAlcoholics} from '../DataModel/AlcoholicModel'
 import ResultWrapper from '../Core/ResultWrapper'
 import { addInspector, getInspector, getInspectors } from '../DataModel/InspectorModel';
 
@@ -44,8 +43,14 @@ export const InspectorsListEndpoint = async (req, res, db) => {
 
 
 export const AddInspectorEndpoint = async (req, res, db) => {
+    const {fullName, dob, phoneNumber} = req.body;
+    if (!fullName || !dob || !phoneNumber) {
+        return res.status(400)
+            .send(ResultWrapper.error(400, 'Invalid data'));
+    }
+    
     try {
-        let result = await addInspector(db)(req.body);
+        let result = await addInspector(db)(fullName, dob, phoneNumber);
         return res
             .status(200)
             .json(ResultWrapper.success(result));

@@ -121,6 +121,68 @@ LIMIT 1
     }
 };
 
+export const areAllAlcoholicsInBed = db => async alcIds => {
+    const values = [alcIds.join(',')];
+
+    const query = `
+    WITH alc_cte AS (
+        SELECT
+        CAST(string_to_table AS int) as alcoholic_id
+        FROM string_to_table(?, ',')
+    ),
+    CTE AS
+	(SELECT BE.STATUS STATUS,
+			GEN.CREATED_AT HAPPENEDAT,
+            be.alcoholic_id
+		FROM ACT.BED BE
+		JOIN ACT.LEAVE L ON L.BED_EVENT_ID = BE.BED_EVENT_ID
+		JOIN ACT.GENERAL GEN ON GEN.GENERAL_ID = L.GENERAL_ID
+        JOIN alc_cte ac ON ac.alcoholic_id = be.alcoholic_id
+		UNION ALL SELECT BE.STATUS STATUS,
+			GEN.CREATED_AT HAPPENEDAT,
+            be.alcoholic_id
+		FROM ACT.BED BE
+		JOIN ACT.ESCAPE E ON E.BED_EVENT_ID = BE.BED_EVENT_ID
+		JOIN ACT.GENERAL GEN ON GEN.GENERAL_ID = E.GENERAL_ID
+        JOIN alc_cte ac ON ac.alcoholic_id = be.alcoholic_id
+		UNION ALL SELECT BE.STATUS STATUS,
+			GEN.CREATED_AT HAPPENEDAT,
+            be.alcoholic_id
+		FROM ACT.BED BE
+		JOIN ACT.JOIN E ON E.BED_EVENT_ID = BE.BED_EVENT_ID
+		JOIN ACT.GENERAL GEN ON GEN.GENERAL_ID = E.GENERAL_ID
+        JOIN alc_cte ac ON ac.alcoholic_id = be.alcoholic_id
+		UNION ALL SELECT BE.STATUS STATUS,
+			GEN.CREATED_AT HAPPENEDAT,
+            be.alcoholic_id
+		FROM ACT.BED BE
+		JOIN ACT.BED_CHANGE BC ON BC.FROM_BED_EVENT_ID = BE.BED_EVENT_ID
+		JOIN ACT.GENERAL GEN ON GEN.GENERAL_ID = BC.GENERAL_ID
+        JOIN alc_cte ac ON ac.alcoholic_id = be.alcoholic_id
+		UNION ALL SELECT BE.STATUS STATUS,
+			GEN.CREATED_AT HAPPENEDAT,
+            be.alcoholic_id
+		FROM ACT.BED BE
+		JOIN ACT.BED_CHANGE BC ON BC.FROM_BED_EVENT_ID = BE.BED_EVENT_ID
+		JOIN ACT.GENERAL GEN ON GEN.GENERAL_ID = BC.GENERAL_ID
+        JOIN alc_cte ac ON ac.alcoholic_id = be.alcoholic_id)
+        SELECT distinct ON (alcoholic_id) alcoholic_id, happenedAt, status
+        FROM CTE
+        ORDER BY alcoholic_id, HAPPENEDAT DESC;
+    `;
+
+    const qResult = await db.raw(query, values);
+    const result = qResult.rows;
+
+    if (result.length > 0) {
+        return alcIds
+            .map(alcId => result.find(alc => alc.alcoholic_d === alcId) && result.find(alc => alc.alcoholic_d === alcId).status === 'occupied')
+            .every(Boolean);
+    } else {
+        return false;
+    }
+};
+
 export const addJoinEvent = db => async (alcId, bedId, inspId) => {
     const values = [alcId, bedId, inspId];
 
@@ -201,6 +263,56 @@ export const addEscapeEvent = db => async (alcId, bedId) => {
     `;
 
     const values = [alcId, bedId];
+    const qResult = await db.raw(query, values);
+    return qResult;
+};
+
+export const addLeaveEvent = db => async (alcId, bedId, inspId) => {
+    const query = `
+    WITH CTE AS
+        (INSERT INTO ACT.GENERAL DEFAULT
+            VALUES RETURNING GENERAL_ID),
+        CTE2 AS
+        (INSERT INTO ACT.BED (ALCOHOLIC_ID,BED_ID,STATUS)
+            VALUES (?,?,'free') RETURNING BED_EVENT_ID)
+    INSERT INTO ACT.leave (general_id, bed_event_id, inspector_id)
+    SELECT GENERAL_ID,
+        CTE2.BED_EVENT_ID,
+        ?
+    FROM CTE,
+        CTE2
+    `;
+
+    const values = [alcId, bedId, inspId];
+    const qResult = await db.raw(query, values);
+    return qResult;
+};
+
+export const addAlcoPartyEvent = db => async (alcoholics) => {
+    const query = `
+    WITH GEN_CTE AS
+	(INSERT INTO ACT.GENERAL DEFAULT
+        VALUES RETURNING GENERAL_ID),
+	CTE AS
+	(SELECT STRING_TO_TABLE(?,
+
+										',') ALCID_DRINKID),
+	CTE2 AS
+	(SELECT STRING_TO_ARRAY(ALCID_DRINKID,
+
+										';') AS ARR
+		FROM CTE)
+    INSERT INTO act.alco_party (general_id, alcoholic_id, drink_id)
+SELECT GENERAL_ID,
+CAST(ARR[1] AS int) ALCID,
+CAST(ARR[2] AS int) DRINKID
+	
+FROM CTE2,
+	GEN_CTE
+    `;
+
+    const param = alcoholics.map(a => `${a.id};${a.drinkId}`).join(',');
+    const values = [param];
     const qResult = await db.raw(query, values);
     return qResult;
 };

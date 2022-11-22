@@ -1,9 +1,9 @@
-import {addAlcoholic, getAlcoholic, getAlcoholics} from '../DataModel/AlcoholicModel'
+import { addAlcoholic, getAlcoholic, getAlcoholics } from '../DataModel/AlcoholicModel'
 import ResultWrapper from '../Core/ResultWrapper'
 
 /** @type Controller */
 export const AlcoholicInfoEndpoint = async (req, res, db) => {
-    let {id} = req.params;
+    let { id } = req.params;
 
     let alcoholic = await getAlcoholic(db)(id)
         .catch((err) => {
@@ -43,8 +43,14 @@ export const AlcoholicsListEndpoint = async (req, res, db) => {
 
 
 export const AddAlcoholicEndpoint = async (req, res, db) => {
+    const { fullName, dob, phoneNumber } = req.body;
+    if (!fullName || !dob || !phoneNumber) {
+        return res.status(400)
+            .send(ResultWrapper.error(400, 'Invalid data'));
+    }
+
     try {
-        let result = await addAlcoholic(db)(req.body);
+        let result = await addAlcoholic(db)(fullName, dob, phoneNumber);
         return res
             .status(200)
             .json(ResultWrapper.success(result));
