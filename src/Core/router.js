@@ -16,7 +16,7 @@ export class Router {
     addRoute(method, url, handler, ignore_base = false) {
         this.router.push({
             method,
-            url: ignore_base ? url : path.join(this.path, url),
+            url: ignore_base ? url : this.path + url,
             handler,
         });
         return this;

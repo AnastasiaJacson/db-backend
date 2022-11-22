@@ -1,22 +1,22 @@
 /** @type DataModel */
-export const getAlcoholic = (db) => (id) => {
+export const getInspector = (db) => (id) => {
     return db
         .select('*')
-        .from('person.alcoholic')
-        .where('alcoholic_id', id)
+        .from('person.inspector')
+        .where('inspector_id', id)
         .first();
 }
 
 /** @type DataModel */
-export const getAlcoholics = (db) => () => {
+export const getInspectors = (db) => () => {
     return db
         .select('*')
-        .from('person.alcoholic');
+        .from('person.inspector');
 }
 
-export const addAlcoholic = (db) => async (reqBody) => {
+export const addInspector = (db) => async (reqBody) => {
     return await db.raw(`
-    INSERT INTO person.alcoholic
+    INSERT INTO person.inspector
     (full_name, dob, phone_number)
     VALUES (?, ?, ?)
     `, [reqBody.fullName, reqBody.dob, reqBody.phoneNumber]);
