@@ -14,10 +14,10 @@ export const getInspectors = (db) => () => {
         .from('person.inspector');
 }
 
-export const addInspector = (db) => async (reqBody) => {
+export const addInspector = (db) => async (fullName, dob, phoneNumber) => {
     return await db.raw(`
     INSERT INTO person.inspector
     (full_name, dob, phone_number)
     VALUES (?, ?, ?)
-    `, [reqBody.fullName, reqBody.dob, reqBody.phoneNumber]);
+    `, [fullName, dob, phoneNumber]);
 }

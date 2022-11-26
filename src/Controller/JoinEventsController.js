@@ -1,40 +1,53 @@
-import ResultWrapper from "../Core/ResultWrapper";
-import { getAlcoholic } from "../DataModel/AlcoholicModel";
-import { addJoinEvent, checkBedStatus, getBed, isAlcoholicInBed } from "../DataModel/EventModel";
-import { getInspector } from "../DataModel/InspectorModel";
+import Wrap from "../Core/WrapError";
+import {getAlcoholic} from "../DataModel/AlcoholicModel";
+import {addJoinEvent, checkBedStatus, getBed, isAlcoholicInBed} from "../DataModel/EventModel";
+import {getInspector} from "../DataModel/InspectorModel";
+import { getFreeBed } from "../DataModel/BedModel"
 
 export const AddJoinEventEndpoint = async (req, res, db) => {
-    if (!(await getBed(db)(req.body.bedId))) {
-        res.status(404).json(ResultWrapper.error(404, 'Bed does not exist'));
-        return;  
-    }
+    let {
+        alcoholic_id,
+        inspector_id
+    } = req.body;
 
-    if (!(await getAlcoholic(db)(req.body.alcoholicId))) {
-        res.status(404).json(ResultWrapper.error(404, 'Alcoholic does not exist'));
-        return;  
-    }
+    console.log(req.body)
 
-    if (!(await getInspector(db)(req.body.inspectorId))) {
-        res.status(400).json(ResultWrapper.error(400, 'Inspector does not exist'));
-        return;  
+    if (!(await getAlcoholic(db)(alcoholic_id))) {
+        res.status(200).json(Wrap.inError(404, 'Alcoholic does not exist'));
+        return;
     }
-    
-    const bedStatus = await checkBedStatus(db)(req.body.bedId);
-    if (bedStatus == 'occupied') {
-      res.status(400).json(ResultWrapper.error(400, 'Bed is in use'));
-      return;
-    }
+    console.log(1)
 
-    const isAlcInBed = await isAlcoholicInBed(db)(req.body.alcoholicId);
+    if (!(await getInspector(db)(inspector_id))) {
+        res.status(200).json(Wrap.inError(400, 'Inspector does not exist'));
+        return;
+    }
+    console.log(2)
+
+
+    const isAlcInBed = await isAlcoholicInBed(db)(alcoholic_id);
     if (isAlcInBed) {
-      res.status(400).json(ResultWrapper.error(400, 'Alcoholic already in bed'));
-      return;
+        res.status(200).json(Wrap.inError(400, 'Alcoholic already in Detoxer'));
+        return;
     }
-  
+
+    const free_bed = await getFreeBed(db)();
+
+    console.log(3)
+
+    if (free_bed === -1) {
+        res
+            .status(200)
+            .json(Wrap.inError(400, 'There are no free beds in Detoxer'));
+        return;
+    }
+
+    console.log(4)
+
     try {
-        const result = await addJoinEvent(db)(req.body.alcoholicId, req.body.bedId, req.body.inspectorId);
-        return res.status(200).json(ResultWrapper.success(result));
+        const result = await addJoinEvent(db)(alcoholic_id, free_bed, inspector_id);
+        return res.status(200).json(Wrap.inSuccess(result));
     } catch (err) {
-        res.status(500).json(ResultWrapper.error(500, err));
+        res.status(500).json(Wrap.inError(500, err));
     }
 };

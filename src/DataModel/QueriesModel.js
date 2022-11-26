@@ -164,7 +164,7 @@ export const query7 = db => async (joinCount, from, to) => {
     WITH cte AS (
         SELECT
         alc.*,
-        COUNT(act.general_id) as joinCount
+        COUNT(j.general_id) as joinCount
         FROM act.join j
         JOIN act.bed be ON be.bed_event_id = j.bed_event_id
         JOIN act.general gen ON gen.general_id = j.general_id
@@ -272,7 +272,7 @@ export const query10 = db => async () => {
 export const query11 = db => async (inspId, from, to) => {
     const query = `
     SELECT BE.BED_ID,
-        COUNT(F.GENERAL_ID) AS FAINTCOUNT
+        COUNT(F.GENERAL_ID) AS FAINT_COUNT
     FROM ACT.FAINT F
     JOIN ACT.GENERAL GEN ON GEN.GENERAL_ID = F.GENERAL_ID
     JOIN ACT.BED BE ON BE.BED_EVENT_ID = F.BED_EVENT_ID

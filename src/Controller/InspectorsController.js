@@ -1,4 +1,4 @@
-import ResultWrapper from '../Core/ResultWrapper'
+import Wrap from '../Core/WrapError'
 import { addInspector, getInspector, getInspectors } from '../DataModel/InspectorModel';
 
 /** @type Controller */
@@ -9,7 +9,7 @@ export const InspectorInfoEndpoint = async (req, res, db) => {
         .catch((err) => {
             return res
                 .status(500)
-                .send(ResultWrapper.error(500, err));
+                .send(Wrap.inError(500, err));
         });
 
     if (res.headersSent) return;
@@ -17,11 +17,11 @@ export const InspectorInfoEndpoint = async (req, res, db) => {
     if (inspector) {
         return res
             .status(200)
-            .json(ResultWrapper.success(inspector));
+            .json(Wrap.inSuccess(inspector));
     } else {
         return res
             .status(404)
-            .send(ResultWrapper.error(404, 'Alcoholic not found'));
+            .send(Wrap.inError(404, 'Alcoholic not found'));
     }
 }
 
@@ -31,14 +31,14 @@ export const InspectorsListEndpoint = async (req, res, db) => {
         .catch((err) => {
             return res
                 .status(500)
-                .send(ResultWrapper.error(500, err));
+                .send(Wrap.inError(500, err));
         });
 
     if (res.headersSent) return;
 
     return res
         .status(200)
-        .json(ResultWrapper.success(result));
+        .json(Wrap.inSuccess(result));
 }
 
 
@@ -46,16 +46,16 @@ export const AddInspectorEndpoint = async (req, res, db) => {
     const {fullName, dob, phoneNumber} = req.body;
     if (!fullName || !dob || !phoneNumber) {
         return res.status(400)
-            .send(ResultWrapper.error(400, 'Invalid data'));
+            .send(Wrap.inError(400, 'Invalid data'));
     }
     
     try {
         let result = await addInspector(db)(fullName, dob, phoneNumber);
         return res
             .status(200)
-            .json(ResultWrapper.success(result));
+            .json(Wrap.inSuccess(result));
     } catch (err) {
         return res.status(500)
-            .send(ResultWrapper.error(500, err));
+            .send(Wrap.inError(500, err));
     }
 }

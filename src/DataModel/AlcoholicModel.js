@@ -14,8 +14,8 @@ export const getAlcoholics = (db) => () => {
         .from('person.alcoholic');
 }
 
-export const addAlcoholic = (db) => async (fullName, dob, phoneNumber) => {
-    return await db.raw(`
+export const addAlcoholic = (db) => (fullName, dob, phoneNumber) => {
+    return db.raw(`
     INSERT INTO person.alcoholic
     (full_name, dob, phone_number)
     VALUES (?, ?, ?)

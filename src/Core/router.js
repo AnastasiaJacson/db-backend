@@ -23,6 +23,18 @@ export class Router {
     }
 
     /**
+     * Error handler
+     * @param app
+     * @param func {function(error: Error, req: Request, res: Response)}
+     */
+    onError(app, func) {
+        app.use((err, req, res, ..._) => {
+            func(err, req, res);
+        });
+        return this;
+    }
+
+    /**
      * @method
      * @param url {string}
      * @param handler {Controller}

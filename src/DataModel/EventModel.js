@@ -71,40 +71,44 @@ export const checkBedStatus = (db) => async bedId => {
 };
 
 export const isAlcoholicInBed = db => async alcId => {
-    const values = [alcId, alcId, alcId, alcId, alcId];
+    const values = [alcId, alcId, alcId, alcId];
 
     const query = `
     WITH CTE AS
-	(SELECT BE.STATUS STATUS,
+	(
+	    SELECT 'leave' event, BE.STATUS as STATUS, BE.BED_ID bed_id,
 			GEN.CREATED_AT HAPPENEDAT
 		FROM ACT.BED BE
 		JOIN ACT.LEAVE L ON L.BED_EVENT_ID = BE.BED_EVENT_ID
 		JOIN ACT.GENERAL GEN ON GEN.GENERAL_ID = L.GENERAL_ID
 		WHERE BE.ALCOHOLIC_ID = ?
-		UNION ALL SELECT BE.STATUS STATUS,
+		
+		UNION ALL
+		
+		SELECT 'escape' event, BE.STATUS STATUS, BE.BED_ID bed_id,
 			GEN.CREATED_AT HAPPENEDAT
 		FROM ACT.BED BE
 		JOIN ACT.ESCAPE E ON E.BED_EVENT_ID = BE.BED_EVENT_ID
 		JOIN ACT.GENERAL GEN ON GEN.GENERAL_ID = E.GENERAL_ID
 		WHERE BE.ALCOHOLIC_ID = ?
-		UNION ALL SELECT BE.STATUS STATUS,
+		
+		UNION ALL
+		
+		SELECT 'join' event, BE.STATUS STATUS, BE.BED_ID bed_id,
 			GEN.CREATED_AT HAPPENEDAT
 		FROM ACT.BED BE
 		JOIN ACT.JOIN E ON E.BED_EVENT_ID = BE.BED_EVENT_ID
 		JOIN ACT.GENERAL GEN ON GEN.GENERAL_ID = E.GENERAL_ID
 		WHERE BE.ALCOHOLIC_ID = ?
-		UNION ALL SELECT BE.STATUS STATUS,
+		
+		UNION ALL
+		
+		SELECT 'bed_change' event, BE.STATUS STATUS, BE.BED_ID bed_id,
 			GEN.CREATED_AT HAPPENEDAT
 		FROM ACT.BED BE
-		JOIN ACT.BED_CHANGE BC ON BC.FROM_BED_EVENT_ID = BE.BED_EVENT_ID
+		JOIN ACT.BED_CHANGE BC ON BC.TO_BED_EVENT_ID = BE.BED_EVENT_ID
 		JOIN ACT.GENERAL GEN ON GEN.GENERAL_ID = BC.GENERAL_ID
-		WHERE BE.ALCOHOLIC_ID = ?
-		UNION ALL SELECT BE.STATUS STATUS,
-			GEN.CREATED_AT HAPPENEDAT
-		FROM ACT.BED BE
-		JOIN ACT.BED_CHANGE BC ON BC.FROM_BED_EVENT_ID = BE.BED_EVENT_ID
-		JOIN ACT.GENERAL GEN ON GEN.GENERAL_ID = BC.GENERAL_ID
-		WHERE BE.ALCOHOLIC_ID = ? )
+		WHERE BE.ALCOHOLIC_ID = ?)
 SELECT *
 FROM CTE
 ORDER BY HAPPENEDAT DESC
@@ -201,9 +205,7 @@ export const addJoinEvent = db => async (alcId, bedId, inspId) => {
   FROM CTE,
       CTE2;
     `;
-    const qResult = await db.raw(query, values);
-
-    return qResult;
+    return await db.raw(query, values);
 }
 
 export const addBedChangeEvent = db => async (alcId, oldBedId, newBedId) => {

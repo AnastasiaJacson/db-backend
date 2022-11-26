@@ -1,5 +1,5 @@
 import {getAlcoholic, getAlcoholics} from '../DataModel/AlcoholicModel'
-import ResultWrapper from '../Core/ResultWrapper'
+import Wrap from '../Core/WrapError'
 
 /** @type Controller */
 export const AlcoholicInfoEndpoint = async (req, res, db) => {
@@ -9,7 +9,7 @@ export const AlcoholicInfoEndpoint = async (req, res, db) => {
         .catch((err) => {
             return res
                 .status(500)
-                .send(ResultWrapper.error(500, err));
+                .send(Wrap.inError(500, err));
         });
 
     if (res.headersSent) return;
@@ -18,11 +18,11 @@ export const AlcoholicInfoEndpoint = async (req, res, db) => {
         console.log(alcoholic);
         return res
             .status(200)
-            .json(ResultWrapper.success(alcoholic));
+            .json(Wrap.inSuccess(alcoholic));
     } else {
         return res
             .status(404)
-            .send(ResultWrapper.error(404, 'Alcoholic not found'));
+            .send(Wrap.inError(404, 'Alcoholic not found'));
     }
 }
 
@@ -32,12 +32,12 @@ export const AlcoholicsListEndpoint = async (req, res, db) => {
         .catch((err) => {
             return res
                 .status(500)
-                .send(ResultWrapper.error(500, err));
+                .send(Wrap.inError(500, err));
         });
 
     if (res.headersSent) return;
 
     return res
         .status(200)
-        .json(ResultWrapper.success(result));
+        .json(Wrap.inSuccess(result));
 }

@@ -1,4 +1,4 @@
-export const ResultSuccess = (data) => {
+export const inSuccess = (data) => {
     return {
         success: true,
         error: null,
@@ -6,18 +6,19 @@ export const ResultSuccess = (data) => {
     };
 }
 
-export const ResultError = (code, message) => {
+export const inError = (code, message, details=null) => {
     return {
         success: false,
         data: null,
         error: {
             code,
             message,
+            details,
         },
     };
 }
 
 export default {
-    success: ResultSuccess,
-    error: ResultError,
+    inSuccess,
+    inError,
 }
