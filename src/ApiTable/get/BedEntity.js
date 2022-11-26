@@ -1,4 +1,4 @@
-const cte = `
+export const cte = `
     WITH cte AS (SELECT 'join'         EventType,
                         gen.created_at HappenedAt,
                         be.status,

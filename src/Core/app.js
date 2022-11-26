@@ -40,17 +40,12 @@ export default class App {
         });
 
         this.db.on('error', (err) => {
-            console.error('Unexpected inError on idle client', err);
+            console.error('Unexpected Error on idle client', err);
             process.exit(-1);
         });
 
         this._router = ApiRouter(this.db);
         this._router.applyFor(this.app, this.db);
-        this._router.onError(this.app, (err, req, res) => {
-            console.error(err);
-            res.status(200)
-                .json(inError(500, err.message));
-        });
 
         this.app.use((err, req, res, next) => {
             res.send(inError(500, err.message));
@@ -60,8 +55,6 @@ export default class App {
             res.status(404)
                 .json(inError(404, 'Ohh you are lost, read the API documentation to find your way back home :)'));
         });
-
-
     }
 
     async start() {

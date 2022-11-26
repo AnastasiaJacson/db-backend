@@ -27,6 +27,7 @@ import { AddBedChangeEventEndpoint } from './Controller/BedChangeEventsControlle
 import { AddAlcoPartyEventEndpoint } from './Controller/AlcoPartyEventsController';
 import ApiTableBasicGet from "./ApiTable/get";
 import Wrap from "./Core/WrapError";
+import {StatsEndpoint} from "./Controller/StatsController";
 
 // define router
 export const ApiRouter = (db) => new Router('/api', db)
@@ -62,9 +63,10 @@ export const ApiRouter = (db) => new Router('/api', db)
 
     .post('/autocomplete', AutocompleteEndpoint)
     .get('/api_table/:table', ApiTableBasicGet)
+    .get('/stats', StatsEndpoint)
 
     .get('*', (req, res) => {
-        res.status(404).send(Wrap.inError(404, 'Not found'));
+        res.json(Wrap.inError(404, 'Not found'));
     })
 
 
